@@ -41,8 +41,14 @@
     return true;
   }
   function candidates() {
-    var all = document.querySelectorAll(SELECTOR), out = [];
-    for (var i = 0; i < all.length; i++) if (visible(all[i])) out.push(all[i]);
+    var all = document.querySelectorAll(SELECTOR), out = [], scope = openDialog();
+    for (var i = 0; i < all.length; i++) {
+      var el = all[i];
+      if (!visible(el)) continue;
+      if (scope && !scope.contains(el)) continue;                 // a modal keeps the keys inside it
+      if (el.tagName !== 'A' && el.tagName !== 'BUTTON' && el.querySelector(SELECTOR)) continue;  // boxes that hold buttons are not targets
+      out.push(el);
+    }
     return out;
   }
   function center(r) { return { x: (r.left + r.right) / 2, y: (r.top + r.bottom) / 2 }; }
@@ -77,6 +83,8 @@
   }
 
   function firstFocus() {
+    var dlg = openDialog();
+    if (dlg) { var cb = consentButton(dlg); if (cb && visible(cb)) { setFocus(cb, false); return; } }
     var list = candidates(), best = null, bestD = Infinity, W = window.innerWidth, H = window.innerHeight;
     // prefer content links (films, collections) on screen, then anything in the main area, then the nav
     var tiers = [function (el) { return el.tagName === 'A' && /\/(films|discover|collections|series|browse)\//.test(el.getAttribute('href') || ''); },
@@ -161,8 +169,14 @@
 
   // ---------- dialogs ----------
   function openDialog() {
-    var d = document.querySelector('[role="dialog"], [aria-modal="true"], dialog[open]');
-    return d && visible(d) ? d : null;
+    var list = document.querySelectorAll('[role="dialog"], [role="alertdialog"], [aria-modal="true"], dialog[open], #onetrust-banner-sdk');
+    for (var i = 0; i < list.length; i++) { var d = list[i], r = rect(d), s = getComputedStyle(d);
+      if (r.width > 4 && r.height > 4 && s.visibility !== 'hidden' && s.display !== 'none') return d; }
+    return null;
+  }
+  function consentButton(d) {
+    return d.querySelector('#onetrust-reject-all-handler, button[id*="reject" i], button[class*="reject" i]') ||
+           d.querySelector('#onetrust-accept-btn-handler, button[id*="accept" i], button[class*="accept" i]');
   }
   function closeDialog(d) {
     var btn = d.querySelector('button[aria-label*="lose" i], button[class*="close" i], [data-dismiss], button[title*="lose" i]');
@@ -241,6 +255,8 @@
   // single-page navigation: when the highlighted element leaves the DOM, pick a new one
   setInterval(function () {
     if (cursorMode || typing()) return;
+    var dlg = openDialog();
+    if (dlg && current && !dlg.contains(current)) { firstFocus(); return; }   // a dialog opened: step into it
     if (!current || !document.contains(current) || !visible(current)) {
       if (jw()) return;  // the player owns the keys
       firstFocus();
