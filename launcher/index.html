@@ -10,33 +10,12 @@
 <body>
 <div class="c"><div class="n">CRITERION</div><div class="s" id="s">Opening…</div></div>
 <script>
-// Hands off to TizenBrew with a module launch request.
-//
-// TizenBrew's UI passes a launch request to its background service as soon as
-// the UI's socket opens. On a cold start the service has not loaded its module
-// list yet, the lookup throws, and the UI falls back to its menu. So: warm the
-// service first (launch it, wait for its loopback socket, give the module list
-// a few seconds), then launch TizenBrew with the request. TizenBrew also exits
-// and relaunches itself under its debugger on a cold start, so this page must
-// not exit during that gap: it stays underneath and leaves only once it is
-// visible again for six seconds.
+// Asks the MIST TV agent on this TV to open the Criterion module. The agent
+// sets TizenBrew's auto-launch entry for one launch, starts or restarts
+// TizenBrew, and clears the entry afterwards. This page stays underneath
+// until TizenBrew is left, then exits.
 (function () {
-  // The current module name comes from the MIST TV agent on this TV when it is
-  // up, so a re-registered release needs no tile rebuild. The baked name is
-  // the fallback.
-  var MODULE = { moduleName: 'BaesTheorem/tizenbrew-criterion@a207e27', moduleType: 'gh', args: '' };
-  var AGENT = 'http://127.0.0.1:8099/module';
-  function askAgent(cb) {
-    try {
-      var x = new XMLHttpRequest(); x.open('GET', AGENT, true); x.timeout = 1500;
-      x.onload = function () { try { var m = JSON.parse(x.responseText); if (m && m.moduleName) { MODULE.moduleName = m.moduleName; MODULE.moduleType = m.moduleType || 'gh'; } } catch (e) {} cb(); };
-      x.onerror = x.ontimeout = function () { cb(); };
-      x.send();
-    } catch (e) { cb(); }
-  }
-  var APP = 'xvvl3S1bvH.TizenBrewStandalone';
-  var SERVICE = 'xvvl3S1bvH.StandaloneService';
-  var SOCKET = 'ws://127.0.0.1:8081';
+  var AGENT = 'http://127.0.0.1:8099/launch-module';
   var handedOff = false, timer = null;
   function status(msg) { document.getElementById('s').textContent = msg; }
   function leave() { try { tizen.application.getCurrentApplication().exit(); } catch (e) {} }
@@ -47,44 +26,13 @@
     timer = setTimeout(function () { if (!document.hidden) leave(); }, 6000);
   });
   document.addEventListener('keydown', function (e) { if (e.keyCode === 10009) leave(); });
-
-  function launchApp() {
-    status('Opening Criterion…');
-    try {
-      var data = [new tizen.ApplicationControlData('module', [JSON.stringify(MODULE)])];
-      var ctl = new tizen.ApplicationControl('http://tizen.org/appcontrol/operation/default', null, null, null, data);
-      tizen.application.launchAppControl(ctl, APP,
-        function () { handedOff = true; },
-        function (e) { status('TizenBrew did not start: ' + e.message); });
-    } catch (e) { status('Launch failed: ' + e.message); }
-  }
-
-  // Probe the service socket. Never send anything on it: the service treats
-  // the newest client that speaks as its UI.
-  function probe(tries) {
-    var ws, done = false;
-    try { ws = new WebSocket(SOCKET); } catch (e) { return retry(tries); }
-    ws.onopen = function () { done = true; ws.close(); setTimeout(launchApp, 5000); };
-    ws.onerror = function () { if (!done) { done = true; retry(tries); } };
-    setTimeout(function () { if (!done) { done = true; try { ws.close(); } catch (e) {} retry(tries); } }, 1500);
-  }
-  function retry(tries) {
-    if (tries >= 20) { status('Service did not answer; opening TizenBrew anyway'); launchApp(); return; }
-    setTimeout(function () { probe(tries + 1); }, 1000);
-  }
-
-  // Warm the service. If this TV refuses to start another package's service,
-  // the probe loop still catches a service that TizenBrew started earlier.
-  function warm() {
-    status('Starting TizenBrew service…');
-    try {
-      tizen.application.launchAppControl(
-        new tizen.ApplicationControl('http://tizen.org/appcontrol/operation/service'), SERVICE,
-        function () {}, function () {});
-    } catch (e) {}
-    probe(0);
-  }
-  askAgent(warm);
+  var x = new XMLHttpRequest(); x.open('POST', AGENT, true); x.timeout = 8000;
+  x.onload = function () {
+    if (x.status === 200) { handedOff = true; status('Opening Criterion…'); }
+    else status('Agent said: ' + x.responseText);
+  };
+  x.onerror = x.ontimeout = function () { status('MIST TV agent is not running. Open "MIST TV Agent" once, then try again.'); };
+  x.send();
 })();
 </script>
 </body>
