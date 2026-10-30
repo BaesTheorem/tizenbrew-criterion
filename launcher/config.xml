@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<widget xmlns:tizen="http://tizen.org/ns/widgets" xmlns="http://www.w3.org/ns/widgets" id="https://github.com/BaesTheorem/tizenbrew-criterion" version="1.0.2" viewmodes="maximized">
+<widget xmlns:tizen="http://tizen.org/ns/widgets" xmlns="http://www.w3.org/ns/widgets" id="https://github.com/BaesTheorem/tizenbrew-criterion" version="1.0.3" viewmodes="maximized">
     <tizen:application id="CritLnch01.CriterionChannel" package="CritLnch01" required_version="3.0"/>
-    <access origin="ws://127.0.0.1:8081"/>
+    <access origin="*" subdomains="true"/>
     <content src="index.html"/>
     <feature name="http://tizen.org/feature/screen.size.all"/>
     <icon src="icon.png"/>

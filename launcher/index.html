@@ -21,7 +21,19 @@
 // not exit during that gap: it stays underneath and leaves only once it is
 // visible again for six seconds.
 (function () {
+  // The current module name comes from the MIST TV agent on this TV when it is
+  // up, so a re-registered release needs no tile rebuild. The baked name is
+  // the fallback.
   var MODULE = { moduleName: 'BaesTheorem/tizenbrew-criterion@a207e27', moduleType: 'gh', args: '' };
+  var AGENT = 'http://127.0.0.1:8099/module';
+  function askAgent(cb) {
+    try {
+      var x = new XMLHttpRequest(); x.open('GET', AGENT, true); x.timeout = 1500;
+      x.onload = function () { try { var m = JSON.parse(x.responseText); if (m && m.moduleName) { MODULE.moduleName = m.moduleName; MODULE.moduleType = m.moduleType || 'gh'; } } catch (e) {} cb(); };
+      x.onerror = x.ontimeout = function () { cb(); };
+      x.send();
+    } catch (e) { cb(); }
+  }
   var APP = 'xvvl3S1bvH.TizenBrewStandalone';
   var SERVICE = 'xvvl3S1bvH.StandaloneService';
   var SOCKET = 'ws://127.0.0.1:8081';
@@ -72,7 +84,7 @@
     } catch (e) {}
     probe(0);
   }
-  warm();
+  askAgent(warm);
 })();
 </script>
 </body>
