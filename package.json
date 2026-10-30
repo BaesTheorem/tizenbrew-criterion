@@ -8,18 +8,9 @@
   "main": "criterion.js",
   "evaluateScriptOnDocumentStart": false,
   "keys": [
-    "MediaPlayPause",
-    "MediaPlay",
-    "MediaPause",
-    "MediaStop",
-    "MediaRewind",
-    "MediaFastForward",
-    "ChannelUp",
-    "ChannelDown",
-    "ColorF0Red",
-    "ColorF1Green",
-    "ColorF2Yellow",
-    "ColorF3Blue"
+    "MediaPlayPause", "MediaPlay", "MediaPause", "MediaStop",
+    "MediaRewind", "MediaFastForward", "ChannelUp", "ChannelDown",
+    "ColorF0Red", "ColorF1Green", "ColorF2Yellow", "ColorF3Blue"
   ],
   "license": "MIT"
-}\n
+}
