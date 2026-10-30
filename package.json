@@ -1,0 +1,16 @@
+{
+  "name": "tizenbrew-criterion",
+  "version": "0.1.0",
+  "description": "TizenBrew module: the Criterion Channel website driven by a Samsung TV remote",
+  "appName": "Criterion Channel",
+  "packageType": "mods",
+  "websiteURL": "https://www.criterionchannel.com/",
+  "main": "criterion.js",
+  "evaluateScriptOnDocumentStart": true,
+  "keys": [
+    "MediaPlayPause", "MediaPlay", "MediaPause", "MediaStop",
+    "MediaRewind", "MediaFastForward", "ChannelUp", "ChannelDown",
+    "ColorF0Red", "ColorF1Green", "ColorF2Yellow", "ColorF3Blue"
+  ],
+  "license": "MIT"
+}
