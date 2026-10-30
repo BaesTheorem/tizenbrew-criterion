@@ -10,19 +10,30 @@
 <body>
 <div class="c"><div class="n">CRITERION</div><div class="s" id="s">Opening…</div></div>
 <script>
-// Hands off to TizenBrew with a module launch request, then exits.
-// TizenBrew reads appControl.data[0].value[0] as JSON {moduleName, moduleType, args}.
+// Hands off to TizenBrew with a module launch request. TizenBrew exits and
+// relaunches itself under its debugger on a cold start, so this page must not
+// exit during that gap: it stays underneath, and once it becomes visible again
+// it waits six seconds and exits only if TizenBrew has not come back on top.
 (function () {
   var MODULE = { moduleName: 'BaesTheorem/tizenbrew-criterion@a207e27', moduleType: 'gh', args: '' };
   var TARGET = 'xvvl3S1bvH.TizenBrewStandalone';
-  function fail(msg) { document.getElementById('s').textContent = msg; }
+  var handedOff = false, timer = null;
+  function status(msg) { document.getElementById('s').textContent = msg; }
+  function leave() { try { tizen.application.getCurrentApplication().exit(); } catch (e) {} }
+  document.addEventListener('visibilitychange', function () {
+    if (!handedOff) return;
+    if (document.hidden) { clearTimeout(timer); timer = null; return; }
+    status('Leaving…');
+    timer = setTimeout(function () { if (!document.hidden) leave(); }, 6000);
+  });
+  document.addEventListener('keydown', function (e) { if (e.keyCode === 10009) leave(); });
   try {
     var data = [new tizen.ApplicationControlData('module', [JSON.stringify(MODULE)])];
     var ctl = new tizen.ApplicationControl('http://tizen.org/appcontrol/operation/default', null, null, null, data);
     tizen.application.launchAppControl(ctl, TARGET,
-      function () { setTimeout(function () { tizen.application.getCurrentApplication().exit(); }, 1500); },
-      function (e) { fail('TizenBrew did not start: ' + e.message); });
-  } catch (e) { fail('Launch failed: ' + e.message); }
+      function () { handedOff = true; },
+      function (e) { status('TizenBrew did not start: ' + e.message); });
+  } catch (e) { status('Launch failed: ' + e.message); }
 })();
 </script>
 </body>
