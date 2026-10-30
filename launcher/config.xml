@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <widget xmlns:tizen="http://tizen.org/ns/widgets" xmlns="http://www.w3.org/ns/widgets" id="https://github.com/BaesTheorem/tizenbrew-criterion" version="1.0.0" viewmodes="maximized">
-    <tizen:application id="CritLaunch1.CriterionChannel" package="CritLaunch1" required_version="3.0"/>
+    <tizen:application id="CritLnch01.CriterionChannel" package="CritLnch01" required_version="3.0"/>
     <content src="index.html"/>
     <feature name="http://tizen.org/feature/screen.size.all"/>
     <icon src="icon.png"/>
