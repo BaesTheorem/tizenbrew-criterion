@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Criterion Channel</title>
+<style>html,body{margin:0;height:100%;background:#0b0b0b;color:#eee;font:28px/1.4 Helvetica,Arial,sans-serif}
+.c{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.n{letter-spacing:.35em;font-size:44px}.s{opacity:.6;font-size:22px;margin-top:16px}</style>
+</head>
+<body>
+<div class="c"><div class="n">CRITERION</div><div class="s" id="s">Opening…</div></div>
+<script>
+// Hands off to TizenBrew with a module launch request, then exits.
+// TizenBrew reads appControl.data[0].value[0] as JSON {moduleName, moduleType, args}.
+(function () {
+  var MODULE = { moduleName: 'BaesTheorem/tizenbrew-criterion@a207e27', moduleType: 'gh', args: '' };
+  var TARGET = 'xvvl3S1bvH.TizenBrewStandalone';
+  function fail(msg) { document.getElementById('s').textContent = msg; }
+  try {
+    var data = [new tizen.ApplicationControlData('module', [JSON.stringify(MODULE)])];
+    var ctl = new tizen.ApplicationControl('http://tizen.org/appcontrol/operation/default', null, null, null, data);
+    tizen.application.launchAppControl(ctl, TARGET,
+      function () { setTimeout(function () { tizen.application.getCurrentApplication().exit(); }, 1500); },
+      function (e) { fail('TizenBrew did not start: ' + e.message); });
+  } catch (e) { fail('Launch failed: ' + e.message); }
+})();
+</script>
+</body>
+</html>
